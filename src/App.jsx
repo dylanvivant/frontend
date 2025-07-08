@@ -6,6 +6,14 @@ import Loading from './components/ui/Loading';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Events from './pages/Events';
+import Team from './pages/Team.jsx';
+import Notifications from './pages/Notifications';
+import Landing from './pages/Landing';
+import Practices from './pages/Practices';
+import Glossary from './pages/Glossary';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 
 // Composant de protection des routes
 const ProtectedRoute = ({ children }) => {
@@ -67,6 +75,14 @@ function App() {
               </PublicRoute>
             }
           />
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <Landing />
+              </PublicRoute>
+            }
+          />
 
           {/* Routes protégées */}
           <Route
@@ -74,6 +90,61 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/events"
+            element={
+              <ProtectedRoute>
+                <Events />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/team" element={<Team />} />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <Notifications />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/practices"
+            element={
+              <ProtectedRoute>
+                <Practices />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/glossary"
+            element={
+              <ProtectedRoute>
+                <Glossary />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             }
           />

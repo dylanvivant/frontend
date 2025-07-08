@@ -7,7 +7,7 @@ import {
   UserGroupIcon,
   ClipboardDocumentListIcon,
   BellIcon,
-  ChartBarIcon,
+  BookOpenIcon,
   Cog6ToothIcon,
   Bars3Icon,
   XMarkIcon,
@@ -24,14 +24,13 @@ const navigation = [
     name: 'Demandes',
     href: '/practices',
     icon: ClipboardDocumentListIcon,
-    roles: ['Capitaine', 'Coach', 'Admin'],
+    roles: ['Capitaine'],
   },
-  { name: 'Notifications', href: '/notifications', icon: BellIcon },
   {
-    name: 'Analytics',
-    href: '/analytics',
-    icon: ChartBarIcon,
-    roles: ['Capitaine', 'Coach', 'Admin'],
+    name: 'Glossaire',
+    href: '/glossary',
+    icon: BookOpenIcon,
+    roles: ['Capitaine', 'Coach', 'Joueur'],
   },
 ];
 
@@ -62,7 +61,7 @@ const Navbar = () => {
                 to="/dashboard"
                 className="text-xl font-bold text-primary-600"
               >
-                S4V Team
+                Silent For Vibes
               </Link>
             </div>
 
@@ -128,6 +127,14 @@ const Navbar = () => {
                     >
                       <Cog6ToothIcon className="h-4 w-4 mr-2" />
                       Paramètres
+                    </Link>
+                    <Link
+                      to="/notifications"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      <BellIcon className="h-4 w-4 mr-2" />
+                      Notifications
                     </Link>
                     <button
                       onClick={handleLogout}

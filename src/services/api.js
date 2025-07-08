@@ -145,7 +145,7 @@ export const eventsAPI = {
 // API des demandes d'entraînement
 export const practicesAPI = {
   create: (practiceData) => api.post('/practices/request', practiceData),
-  getAll: () => api.get('/practices'),
+  getAll: (params) => api.get('/practices', { params }),
   getById: (id) => api.get(`/practices/${id}`),
   handle: (id, status, message) =>
     api.patch(`/practices/${id}/handle`, { status, response_message: message }),
@@ -205,4 +205,21 @@ export const reportingAPI = {
   getAttendance: (params) => api.post('/reporting/attendance', params),
 };
 
+// API des équipes adverses (opponent teams)
+export const teamsAPI = {
+  getOpponents: () => api.get('/opponent-teams'),
+  // Ajoute d'autres méthodes si besoin
+};
+
+// ========================================
+// AJOUT dans api.js côté client
+// ========================================
+
+// API des maps
+export const mapsAPI = {
+  getAll: (params = {}) => api.get('/maps', { params }), // ✅ Ajout du support des paramètres
+  create: (mapData) => api.post('/maps', mapData),
+  update: (id, mapData) => api.put(`/maps/${id}`, mapData),
+  deactivate: (id) => api.delete(`/maps/${id}`),
+};
 export default api;

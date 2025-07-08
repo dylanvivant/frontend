@@ -20,9 +20,11 @@ import {
   BellIcon,
   CogIcon,
 } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Récupération des événements à venir
   const { data: upcomingEvents, isLoading: eventsLoading } = useQuery(
@@ -39,7 +41,7 @@ const Dashboard = () => {
     'generalStats',
     () => analyticsAPI.getGeneral(),
     {
-      enabled: ['Capitaine', 'Coach', 'Admin'].includes(user?.role),
+      enabled: ['Capitaine', 'Coach'].includes(user?.role),
       onError: (error) =>
         console.error(
           'Erreur lors de la récupération des statistiques:',
@@ -80,11 +82,28 @@ const Dashboard = () => {
     }
   );
 
+  const [recentNotifications, setRecentNotifications] = useState([]);
+
   const getWelcomeMessage = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Bonjour';
     if (hour < 18) return 'Bonne après-midi';
     return 'Bonsoir';
+  };
+
+  const handleNotificationClick = async (notif) => {
+    // Optimistic update
+    setRecentNotifications((prev) =>
+      prev.map((n) => (n.id === notif.id ? { ...n, is_read: true } : n))
+    );
+    try {
+      if (!notif.is_read) {
+        await notificationsAPI.markAsRead(notif.id);
+      }
+      navigate(`/notifications?id=${notif.id}`);
+    } catch {
+      navigate(`/notifications?id=${notif.id}`);
+    }
   };
 
   const StatCard = ({ title, value, icon: Icon, color = 'primary' }) => (
@@ -123,7 +142,7 @@ const Dashboard = () => {
         </div>
 
         {/* Statistiques générales (pour les capitaines/admins) */}
-        {['Capitaine', 'Coach', 'Admin'].includes(user?.role) && (
+        {['Capitaine', 'Coach'].includes(user?.role) && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {statsLoading ? (
               <div className="col-span-full flex justify-center py-8">
@@ -183,8 +202,8 @@ const Dashboard = () => {
                               {event.title}
                             </p>
                             <p className="text-sm text-gray-500">
-                              {formatDate(event.start_date)} à{' '}
-                              {formatTime(event.start_date)}
+                              {formatDate(event.start_time)} à{' '}
+                              {formatTime(event.start_time)}
                             </p>
                           </div>
                         </div>
@@ -239,9 +258,12 @@ const Dashboard = () => {
                   Array.isArray(notifications) &&
                   notifications.length > 0 ? (
                     notifications.map((notification) => {
-                      console.log('🎯 Rendu notification:', notification);
                       return (
-                        <div key={notification.id} className="flex space-x-3">
+                        <div
+                          key={notification.id}
+                          onClick={() => handleNotificationClick(notification)}
+                          className="flex space-x-3"
+                        >
                           <div className="flex-shrink-0">
                             <BellIcon className="h-5 w-5 text-primary-600" />
                           </div>
@@ -255,18 +277,13 @@ const Dashboard = () => {
                             <p className="text-xs text-gray-400 mt-1">
                               {formatDate(notification.created_at)}
                             </p>
-                            {/* Debug pour is_read */}
-                            {process.env.NODE_ENV === 'development' && (
-                              <p className="text-xs text-blue-600">
+                            {notification.title ===
+                            'Bienvenue dans S4V Team !' ? null : (
+                              <p className="text-xs text-primary-600">
                                 {notification.is_read ? 'Lu' : 'Non lu'}
                               </p>
                             )}
                           </div>
-                          {!notification.is_read && (
-                            <div className="flex-shrink-0">
-                              <div className="h-2 w-2 bg-primary-600 rounded-full"></div>
-                            </div>
-                          )}
                         </div>
                       );
                     })
