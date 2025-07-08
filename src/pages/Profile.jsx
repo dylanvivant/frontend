@@ -45,12 +45,10 @@ export default function Profile() {
     setSuccess('');
     setError('');
     try {
-      const res = await usersAPI.update(user.id, form);
-      const updatedUser = res.data?.data?.member || { ...user, ...form };
-      setUser(updatedUser);
+      await usersAPI.update(user.id, form);
       setSuccess('Profil mis à jour !');
       setIsEditing(false);
-      window.location.reload(); // <-- Ajoute ceci
+      window.location.reload(); // <-- recharge la page pour tout rafraîchir
     } catch (e) {
       console.error(e);
       setError(e.response?.data?.message || 'Erreur lors de la mise à jour.');
