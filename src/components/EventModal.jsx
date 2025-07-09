@@ -100,7 +100,7 @@ const EventModal = ({
 
   // Filtrer les types selon le rôle
   const filteredTypes = eventTypes.filter((type) => {
-    if (userRole === 'Joueur') return type.name === 'session_jeu';
+    if (userRole === 'Joueur') return type.name === 'session de jeu';
     if (userRole === 'Coach') return type.name === 'coaching';
     return true; // Capitaine
   });

@@ -1,4 +1,5 @@
 // Utilitaires pour la gestion des tokens JWT
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 /**
  * Vérifie si un token JWT est valide (structure de base)
@@ -201,7 +202,7 @@ export const testLogin = async (
     console.group('🧪 Test de connexion');
     console.log(`Tentative de connexion avec: ${email}`);
 
-    const response = await fetch('http://localhost:3000/api/auth/login', {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -470,7 +470,8 @@ const Events = () => {
   const stats = {
     total: weekEvents.length,
     sessionJeu: weekEvents.filter(
-      (e) => e.event_types?.name === 'session_jeu' || e.type === 'session_jeu'
+      (e) =>
+        e.event_types?.name === 'session de jeu' || e.type === 'session de jeu'
     ).length,
     tournois: weekEvents.filter(
       (e) => e.event_types?.name === 'tournois' || e.type === 'tournois'
