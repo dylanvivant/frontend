@@ -1,11 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
-import { notificationsAPI, eventsAPI } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
+import { notificationsAPI } from '../services/api';
 
 function Notifications() {
-  const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -37,7 +35,9 @@ function Notifications() {
     setError('');
     try {
       const res = await notificationsAPI.getAll();
-      setNotifications(res.data?.data?.notifications || []);
+      const notifications = res.data?.data?.notifications || [];
+      console.log('📋 Notifications reçues:', notifications);
+      setNotifications(notifications);
     } catch (e) {
       setError('Erreur lors du chargement des notifications');
     } finally {
@@ -45,18 +45,25 @@ function Notifications() {
     }
   }
 
-  async function handleRespond(invitationId, status) {
+  async function handleRespond(eventId, status) {
     setIsLoading(true);
     setError('');
     setSuccess('');
     try {
+      console.log(
+        '🔄 Réponse à invitation - eventId:',
+        eventId,
+        'status:',
+        status
+      );
       await notificationsAPI.respondToInvitation({
-        invitation_id: invitationId,
+        event_id: eventId,
         status,
       });
       setSuccess('Réponse envoyée !');
       fetchNotifications();
     } catch (e) {
+      console.error('❌ Erreur lors de la réponse:', e);
       setError('Erreur lors de la réponse');
     } finally {
       setIsLoading(false);
@@ -93,12 +100,12 @@ function Notifications() {
                     </div>
                   </div>
                   {notif.type === 'invitation' &&
-                    notif.status === 'pending' && (
+                    notif.metadata?.status === 'pending' && (
                       <div className="flex gap-2 mt-2 sm:mt-0">
                         <button
                           className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
                           onClick={() =>
-                            handleRespond(notif.invitation_id, 'accepted')
+                            handleRespond(notif.event_id, 'accepted')
                           }
                           disabled={isLoading}
                         >
@@ -107,7 +114,7 @@ function Notifications() {
                         <button
                           className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                           onClick={() =>
-                            handleRespond(notif.invitation_id, 'declined')
+                            handleRespond(notif.event_id, 'declined')
                           }
                           disabled={isLoading}
                         >
@@ -116,15 +123,15 @@ function Notifications() {
                       </div>
                     )}
                   {notif.type === 'invitation' &&
-                    notif.status !== 'pending' && (
+                    notif.metadata?.status !== 'pending' && (
                       <div className="text-xs font-medium text-gray-500 mt-2 sm:mt-0">
-                        {notif.status === 'accepted' && (
+                        {notif.metadata?.status === 'accepted' && (
                           <span className="text-green-600">Acceptée</span>
                         )}
-                        {notif.status === 'declined' && (
+                        {notif.metadata?.status === 'declined' && (
                           <span className="text-red-600">Refusée</span>
                         )}
-                        {notif.status === 'expired' && (
+                        {notif.metadata?.status === 'expired' && (
                           <span className="text-gray-400">Expirée</span>
                         )}
                       </div>

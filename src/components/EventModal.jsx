@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import InviteModal from './InviteModal';
 
 const recurrencePatterns = [
@@ -98,24 +98,60 @@ const EventModal = ({
     }
   }, [editingEvent, isOpen]);
 
-  // Filtrer les types selon le rôle
-  const filteredTypes = eventTypes.filter((type) => {
-    if (userRole === 'Joueur') return type.name === 'session de jeu';
-    if (userRole === 'Coach') return type.name === 'coaching';
-    return true; // Capitaine
-  });
+  useEffect(() => {
+    if (isOpen && !editingEvent && eventTypes.length > 0) {
+      console.log('🔧 Initializing type for role:', userRole);
+      console.log('🔧 Available event types:', eventTypes);
 
-  // Filtrer les utilisateurs selon le type d'event et le rôle
-  const filteredUsers = users.filter((user) => {
-    if (user.id === currentUserId) return false; // Exclure l'utilisateur actuel
-    if (userRole === 'Coach') return user.roles && user.roles.name === 'Joueur';
-    if (
-      userRole === 'Capitaine' &&
-      ['coaching', 'tournois', 'practices'].includes(form.type)
-    )
-      return user.roles && user.roles.name === 'Joueur';
-    return user.roles && user.roles.name !== userRole;
-  });
+      if (userRole === 'Joueur') {
+        // Chercher "session_jeu" ou similaire
+        const sessionType = eventTypes.find(
+          (t) =>
+            t.name === 'session_jeu' ||
+            t.name?.toLowerCase().includes('session') ||
+            t.label?.toLowerCase().includes('session')
+        );
+        console.log('🔧 Found session type for Joueur:', sessionType);
+        if (sessionType) {
+          setForm((prev) => ({
+            ...prev,
+            type: sessionType.name,
+          }));
+        }
+      } else if (userRole === 'Coach') {
+        // Chercher "coaching"
+        const coachingType = eventTypes.find(
+          (t) =>
+            t.name === 'coaching' ||
+            t.name?.toLowerCase().includes('coach') ||
+            t.label?.toLowerCase().includes('coach')
+        );
+        console.log('🔧 Found coaching type for Coach:', coachingType);
+        if (coachingType) {
+          setForm((prev) => ({
+            ...prev,
+            type: coachingType.name,
+          }));
+        }
+      }
+    }
+  }, [isOpen, userRole, eventTypes, editingEvent]);
+
+  // Correction du filtrage des types d'événement
+  const filteredTypes = useMemo(() => {
+    if (userRole === 'Coach') {
+      return eventTypes.filter((type) => type.name === 'coaching');
+    } else if (userRole === 'Capitaine') {
+      return eventTypes;
+    } else {
+      // Pour les Joueurs, filtrer les types appropriés (session_jeu)
+      return eventTypes.filter(
+        (type) =>
+          type.name === 'session_jeu' ||
+          type.name?.toLowerCase().includes('session')
+      );
+    }
+  }, [userRole, eventTypes]);
 
   // Afficher la section récurrence uniquement pour les rôles autorisés
   const canSetRecurrence = userRole === 'Capitaine';
@@ -172,19 +208,31 @@ const EventModal = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('📤 EventModal handleSubmit - form.type:', form.type);
+    console.log('📤 EventModal handleSubmit - full form:', form);
+
     if (form.type !== 'entrainement' && form.invited_users.length === 0) {
       alert('Veuillez inviter au moins un membre.');
       return;
     }
 
+    // Trouver l'event_type_id correspondant au type sélectionné
+    const selectedType = eventTypes.find((t) => t.name === form.type);
+    const event_type_id = selectedType ? selectedType.id : undefined;
+    console.log('📤 EventModal found selectedType:', selectedType);
+    console.log('📤 EventModal mapped event_type_id:', event_type_id);
+
     const submitData = {
       ...form,
+      event_type_id,
       recurrence_days_of_week:
         form.recurrence_days_of_week.length > 0
           ? form.recurrence_days_of_week
           : null,
       id: editingEvent?.id,
     };
+    // On retire le champ 'type' car le backend attend event_type_id
+    delete submitData.type;
     onSave(submitData);
   };
 
@@ -195,7 +243,6 @@ const EventModal = ({
   const submitButtonText = isEditing
     ? "Modifier l'événement"
     : "Créer l'événement";
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <form
@@ -246,7 +293,7 @@ const EventModal = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Type d'événement
+                Type d&apos;événement
               </label>
               {userRole === 'Capitaine' ? (
                 <select
@@ -256,21 +303,38 @@ const EventModal = ({
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                   required
                 >
-                  <option value="">Sélectionner un type</option>
+                  <option value="">
+                    Sélectionner un type d&apos;événement
+                  </option>
                   {filteredTypes.map((type) => (
                     <option key={type.id} value={type.name}>
                       {type.label || type.name}
                     </option>
                   ))}
                 </select>
-              ) : (
+              ) : userRole === 'Coach' ? (
                 <select
                   name="type"
-                  value={filteredTypes[0]?.name || ''}
+                  value={form.type || filteredTypes[0]?.name || ''}
+                  onChange={handleChange}
                   disabled
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
                 >
-                  <option value={filteredTypes[0]?.name || ''}>
+                  <option value={form.type || filteredTypes[0]?.name || ''}>
+                    {filteredTypes[0]?.label ||
+                      filteredTypes[0]?.name ||
+                      'Aucun type disponible'}
+                  </option>
+                </select>
+              ) : (
+                <select
+                  name="type"
+                  value={form.type || filteredTypes[0]?.name || ''}
+                  onChange={handleChange}
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
+                >
+                  <option value={form.type || filteredTypes[0]?.name || ''}>
                     {filteredTypes[0]?.label || filteredTypes[0]?.name || ''}
                   </option>
                 </select>
@@ -560,6 +624,7 @@ const EventModal = ({
         eventType={form.type}
         userRole={userRole}
         eventTitle={form.title}
+        currentUserId={currentUserId}
       />
     </div>
   );

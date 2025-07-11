@@ -205,8 +205,17 @@ const NotificationItem = ({
 
   const isInvitation =
     notification.type === 'invitation' &&
-    notification.metadata?.status === 'invited';
+    notification.metadata?.status === 'pending';
   const eventId = notification.metadata?.event_id || notification.event_id;
+
+  // Debug des boutons
+  console.log('🔍 Debug notification:', {
+    id: notification.id,
+    type: notification.type,
+    metadataStatus: notification.metadata?.status,
+    isInvitation,
+    eventId,
+  });
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {

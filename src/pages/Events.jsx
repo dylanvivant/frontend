@@ -338,19 +338,63 @@ const Events = () => {
   };
 
   // Nouveau : Édition d'un événement
-  const handleEventEdit = (event) => {
-    setEditingEvent(event);
-    setSelectedEvent(null);
-    setShowEventModal(true);
+  const handleEventEdit = async (event) => {
+    try {
+      // Récupérer les détails complets de l'événement avec participants
+      const response = await eventsAPI.getById(event.id);
+      const eventWithParticipants = response.data.data.event;
+
+      setEditingEvent(eventWithParticipants);
+      setSelectedEvent(null);
+      setShowEventModal(true);
+    } catch (error) {
+      console.error(
+        'Erreur lors de la récupération de l&apos;événement:',
+        error
+      );
+      // Fallback vers l'événement original si l'API échoue
+      setEditingEvent(event);
+      setSelectedEvent(null);
+      setShowEventModal(true);
+    }
   };
 
   // Sauvegarde d'un événement (création ou modification)
   const handleSaveEvent = async (form) => {
     setIsSaving(true);
     try {
-      // Trouver l'id du type d'événement
-      const selectedType = eventTypes.find((t) => t.name === form.type);
-      const event_type_id = selectedType ? selectedType.id : undefined;
+      console.log('=== Debug handleSaveEvent ===');
+      console.log('Form data:', form);
+      console.log('Event types available:', eventTypes);
+      console.log('User role:', user?.role);
+
+      // Vérifier si event_type_id est déjà défini (venant d'EventModal)
+      let event_type_id = form.event_type_id;
+
+      if (!event_type_id && form.type) {
+        // Fallback: mapper depuis form.type si event_type_id n'est pas défini
+        const selectedType = eventTypes.find((t) => t.name === form.type);
+        console.log('Selected type:', selectedType);
+        event_type_id = selectedType ? selectedType.id : undefined;
+        console.log('Mapped event_type_id:', event_type_id);
+      } else {
+        console.log('✅ event_type_id already defined:', event_type_id);
+      }
+
+      if (!event_type_id) {
+        console.error(
+          '❌ Aucun event_type_id trouvé. form.type:',
+          form.type,
+          'form.event_type_id:',
+          form.event_type_id
+        );
+        alert(
+          `Erreur: Type d&apos;événement non défini. Types disponibles: ${eventTypes
+            .map((t) => t.name)
+            .join(', ')}`
+        );
+        return;
+      }
 
       // Mapping des champs pour l'API
       const payload = {
@@ -388,16 +432,24 @@ const Events = () => {
             : null,
       };
 
-      // Nettoyer les champs inutiles
+      console.log('Payload before cleaning:', payload);
+
+      // Nettoyer les champs inutiles SAUF les champs requis
+      const requiredFields = ['title', 'event_type_id', 'start_time'];
+      const protectedFields = ['participant_ids']; // Champs à conserver même si null
       Object.keys(payload).forEach((key) => {
         if (
-          payload[key] === null ||
-          payload[key] === '' ||
-          payload[key] === undefined
+          !requiredFields.includes(key) &&
+          !protectedFields.includes(key) &&
+          (payload[key] === null ||
+            payload[key] === '' ||
+            payload[key] === undefined)
         ) {
           delete payload[key];
         }
       });
+
+      console.log('Final payload:', payload);
 
       if (editingEvent) {
         // Modification d'un événement existant
@@ -471,7 +523,7 @@ const Events = () => {
     total: weekEvents.length,
     sessionJeu: weekEvents.filter(
       (e) =>
-        e.event_types?.name === 'session de jeu' || e.type === 'session de jeu'
+        e.event_types?.name === 'session_jeu' || e.type === 'session de jeu'
     ).length,
     tournois: weekEvents.filter(
       (e) => e.event_types?.name === 'tournois' || e.type === 'tournois'
@@ -482,10 +534,16 @@ const Events = () => {
     entrainement: weekEvents.filter(
       (e) => e.event_types?.name === 'entrainement' || e.type === 'entrainement'
     ).length,
+    practices: weekEvents.filter(
+      (e) => e.event_types?.name === 'practices' || e.type === 'practices'
+    ).length,
   };
 
   // Vérifier les permissions pour créer des événements
-  const canCreateEvents = user?.role === 'Capitaine' || user?.role === 'Coach';
+  const canCreateEvents =
+    user?.role === 'Capitaine' ||
+    user?.role === 'Coach' ||
+    user?.role === 'Joueur';
 
   return (
     <Layout>
@@ -570,26 +628,26 @@ const Events = () => {
           {/* Statistiques rapides */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
             {[
-              {
-                label: 'Total cette semaine',
-                value: stats.total,
-                color: 'primary',
-                icon: (
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                ),
-              },
+              // {
+              //   label: 'Total cette semaine',
+              //   value: stats.total,
+              //   color: 'primary',
+              //   icon: (
+              //     <svg
+              //       className="w-6 h-6"
+              //       fill="none"
+              //       stroke="currentColor"
+              //       viewBox="0 0 24 24"
+              //     >
+              //       <path
+              //         strokeLinecap="round"
+              //         strokeLinejoin="round"
+              //         strokeWidth={2}
+              //         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              //       />
+              //     </svg>
+              //   ),
+              // },
               {
                 label: 'Entraînements',
                 value: stats.entrainement,
@@ -628,6 +686,22 @@ const Events = () => {
                       d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.01M15 10h1.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
+                ),
+              },
+              {
+                label: 'Pratiques',
+                value: stats.practices,
+                color: 'primary',
+                icon: (
+                  <img
+                    src="/sword.svg"
+                    alt="Épées croisées"
+                    className="w-6 h-6"
+                    style={{
+                      filter:
+                        'brightness(0) saturate(100%) invert(35%) sepia(85%) saturate(1347%) hue-rotate(240deg) brightness(75%) contrast(120%)',
+                    }}
+                  />
                 ),
               },
               {
