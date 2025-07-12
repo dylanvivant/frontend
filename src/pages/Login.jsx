@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
@@ -10,6 +10,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login, error, clearError } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     register,
@@ -75,6 +76,12 @@ const Login = () => {
               placeholder="Votre mot de passe"
             />
           </div>
+
+          {location.state?.message && (
+            <div className="rounded-md bg-green-50 p-4">
+              <p className="text-sm text-green-800">{location.state.message}</p>
+            </div>
+          )}
 
           {(error || errors.root) && (
             <div className="rounded-md bg-red-50 p-4">

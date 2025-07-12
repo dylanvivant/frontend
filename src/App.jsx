@@ -5,6 +5,7 @@ import Loading from './components/ui/Loading';
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
 import Team from './pages/Team.jsx';
@@ -73,6 +74,14 @@ function App() {
             element={
               <PublicRoute>
                 <Register />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/verify-email"
+            element={
+              <PublicRoute>
+                <VerifyEmail />
               </PublicRoute>
             }
           />
