@@ -255,15 +255,15 @@ function Team() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
                 <option value="">Sélectionner un rank</option>
-                <option value="iron">Iron</option>
-                <option value="bronze">Bronze</option>
-                <option value="silver">Silver</option>
-                <option value="gold">Gold</option>
-                <option value="platinum">Platinum</option>
-                <option value="diamond">Diamond</option>
-                <option value="ascendant">Ascendant</option>
-                <option value="immortal">Immortal</option>
-                <option value="radiant">Radiant</option>
+                <option value="Iron">Iron</option>
+                <option value="Bronze">Bronze</option>
+                <option value="Silver">Silver</option>
+                <option value="Gold">Gold</option>
+                <option value="Platinum">Platinum</option>
+                <option value="Diamond">Diamond</option>
+                <option value="Ascendant">Ascendant</option>
+                <option value="Immortal">Immortal</option>
+                <option value="Radiant">Radiant</option>
               </select>
             </div>
             <div className="flex justify-end gap-2 mt-4">
