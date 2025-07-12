@@ -125,6 +125,7 @@ export const usersAPI = {
   getRoles: () => api.get('/users/roles'),
   getPlayerTypes: () => api.get('/users/player-types'),
   getTeamStats: () => api.get('/users/stats/team'),
+  resendVerification: (id) => api.post(`/users/${id}/resend-verification`),
 };
 
 // API des événements
