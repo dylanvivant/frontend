@@ -240,8 +240,8 @@ function Team() {
               >
                 <option value="">Sélectionner un rôle</option>
                 <option value="1">Joueur</option>
-                <option value="2">Coach</option>
-                <option value="3">Capitaine</option>
+                <option value="3">Coach</option>
+                <option value="2">Capitaine</option>
               </select>
             </div>
             <div className="mb-3">
