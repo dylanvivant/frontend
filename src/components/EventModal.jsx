@@ -157,7 +157,7 @@ const EventModal = ({
   const canSetRecurrence = userRole === 'Capitaine';
 
   // Afficher opponent_team_id uniquement pour tournois
-  const showOpponent = form.type === 'tournois';
+  const showOpponent = form.type === 'tournois' || form.type === 'practices';
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
