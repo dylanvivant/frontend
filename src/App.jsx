@@ -14,6 +14,7 @@ import Practices from './pages/Practices';
 import Glossary from './pages/Glossary';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
 
 // Composant de protection des routes
 const ProtectedRoute = ({ children }) => {
@@ -153,23 +154,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
           {/* Route 404 */}
-          <Route
-            path="*"
-            element={
-              <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                  <h1 className="text-6xl font-bold text-gray-900">404</h1>
-                  <p className="text-xl text-gray-600 mt-4">Page non trouvée</p>
-                  <a
-                    href="/dashboard"
-                    className="mt-6 inline-block bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 transition-colors"
-                  >
-                    Retour au tableau de bord
-                  </a>
-                </div>
-              </div>
-            }
-          />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </AuthProvider>
