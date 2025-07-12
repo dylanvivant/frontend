@@ -453,7 +453,14 @@ const Events = () => {
 
       if (editingEvent) {
         // Modification d'un événement existant
-        await eventsAPI.update(editingEvent.id, payload);
+        // Pour les événements récurrents, utiliser l'ID original
+        const eventIdToUpdate =
+          editingEvent.original_event_id || editingEvent.id;
+        console.log('🔄 ID à utiliser pour la modification:', eventIdToUpdate);
+        console.log('🔄 Event original ID:', editingEvent.original_event_id);
+        console.log('🔄 Event current ID:', editingEvent.id);
+
+        await eventsAPI.update(eventIdToUpdate, payload);
         console.log('Événement modifié avec succès');
       } else {
         // Création d'un nouvel événement

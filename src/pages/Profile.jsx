@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usersAPI, authAPI } from '../services/api';
 import Layout from '../components/layout/Layout';
 import Badge from '../components/ui/Badge';
+import Input from '../components/ui/Input';
 
 const ranks = [
   'Iron',
@@ -202,45 +203,30 @@ export default function Profile() {
           </div>
           {showPassword && (
             <form onSubmit={handleChangePassword} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Mot de passe actuel
-                </label>
-                <input
-                  name="current"
-                  type="password"
-                  value={passwords.current}
-                  onChange={handlePwChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Nouveau mot de passe
-                </label>
-                <input
-                  name="new"
-                  type="password"
-                  value={passwords.new}
-                  onChange={handlePwChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Confirmer le nouveau mot de passe
-                </label>
-                <input
-                  name="confirm"
-                  type="password"
-                  value={passwords.confirm}
-                  onChange={handlePwChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
+              <Input
+                label="Mot de passe actuel"
+                name="current"
+                type="password"
+                value={passwords.current}
+                onChange={handlePwChange}
+                required
+              />
+              <Input
+                label="Nouveau mot de passe"
+                name="new"
+                type="password"
+                value={passwords.new}
+                onChange={handlePwChange}
+                required
+              />
+              <Input
+                label="Confirmer le nouveau mot de passe"
+                name="confirm"
+                type="password"
+                value={passwords.confirm}
+                onChange={handlePwChange}
+                required
+              />
               {pwSuccess && <div className="text-green-600">{pwSuccess}</div>}
               {pwError && <div className="text-red-600">{pwError}</div>}
               <button

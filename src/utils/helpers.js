@@ -208,3 +208,79 @@ export const getInitials = (name) => {
     .toUpperCase()
     .slice(0, 2);
 };
+
+// Fonction pour convertir une date UTC en heure locale pour l'affichage
+export const formatDateTimeForDisplay = (utcDateString) => {
+  if (!utcDateString) return null;
+
+  // Créer une date à partir de la chaîne UTC
+  const date = new Date(utcDateString);
+
+  // Retourner la date en heure locale
+  return date;
+};
+
+// Fonction pour formater une date UTC en string locale pour les inputs datetime-local
+export const formatDateTimeForInput = (utcDateString) => {
+  if (!utcDateString) return '';
+
+  // Extraire directement la date et l'heure de la chaîne UTC
+  const dateMatch = utcDateString.match(/(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+  if (dateMatch) {
+    return `${dateMatch[1]}T${dateMatch[2]}`;
+  }
+
+  // Fallback si le format n'est pas reconnu
+  const date = new Date(utcDateString);
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 16);
+};
+
+// Fonction simple pour formater une datetime-local pour la base de données
+export const formatDateTimeForDatabase = (localDateTimeString) => {
+  if (!localDateTimeString) return null;
+
+  // Prendre directement la valeur de l'input et ajouter les secondes + timezone
+  // "2025-07-13T18:00" -> "2025-07-13T18:00:00.000Z"
+  return localDateTimeString + ':00.000Z';
+};
+
+// Fonction pour traiter les dates comme des heures locales (pas UTC)
+export const parseAsLocalTime = (dateString) => {
+  if (!dateString) return null;
+
+  // Si la date contient un fuseau horaire, on la parse normalement
+  if (
+    dateString.includes('T') &&
+    (dateString.includes('Z') || dateString.includes('+'))
+  ) {
+    return new Date(dateString);
+  }
+
+  // Sinon, on la traite comme une heure locale
+  const date = new Date(dateString);
+
+  // Compenser le décalage de fuseau horaire pour traiter comme heure locale
+  const offsetInMinutes = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() + offsetInMinutes * 60000);
+
+  return localDate;
+};
+
+// Fonction pour afficher une heure en format local, en traitant la date comme heure locale
+export const formatTimeAsLocal = (dateString) => {
+  if (!dateString) return '--:--';
+
+  // Extraire l'heure directement de la chaîne UTC sans conversion
+  const dateMatch = dateString.match(/(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+  if (dateMatch) {
+    return dateMatch[2]; // Retourner directement l'heure HH:MM
+  }
+
+  // Fallback si le format n'est pas reconnu
+  return new Date(dateString).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Europe/Paris',
+  });
+};

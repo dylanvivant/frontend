@@ -1,5 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import InviteModal from './InviteModal';
+import {
+  formatDateTimeForInput,
+  formatDateTimeForDatabase,
+} from '../utils/helpers';
 
 const recurrencePatterns = [
   { value: 'daily', label: 'Quotidien' },
@@ -55,12 +59,8 @@ const EventModal = ({
       setForm({
         title: editingEvent.title || '',
         type: editingEvent.event_types?.name || editingEvent.type || '',
-        start_time: editingEvent.start_time
-          ? new Date(editingEvent.start_time).toISOString().slice(0, 16)
-          : '',
-        end_time: editingEvent.end_time
-          ? new Date(editingEvent.end_time).toISOString().slice(0, 16)
-          : '',
+        start_time: formatDateTimeForInput(editingEvent.start_time),
+        end_time: formatDateTimeForInput(editingEvent.end_time),
         is_recurring: editingEvent.is_recurring || false,
         recurrence_pattern: editingEvent.recurrence_pattern || null,
         recurrence_interval: editingEvent.recurrence_interval || 1,
@@ -225,12 +225,23 @@ const EventModal = ({
     const submitData = {
       ...form,
       event_type_id,
+      start_time: formatDateTimeForDatabase(form.start_time),
+      end_time: formatDateTimeForDatabase(form.end_time),
       recurrence_days_of_week:
         form.recurrence_days_of_week.length > 0
           ? form.recurrence_days_of_week
           : null,
-      id: editingEvent?.id,
     };
+
+    // Log pour debug (l'ID est géré par Events.jsx, pas par EventModal)
+    if (editingEvent && editingEvent.id) {
+      console.log(
+        "📤 EventModal - Modification d'un événement existant:",
+        editingEvent.id
+      );
+    } else {
+      console.log("📤 EventModal - Création d'un nouvel événement");
+    }
     // On retire le champ 'type' car le backend attend event_type_id
     delete submitData.type;
     onSave(submitData);
@@ -293,7 +304,7 @@ const EventModal = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Type d&apos;événement
+                Type d'événement
               </label>
               {userRole === 'Capitaine' ? (
                 <select

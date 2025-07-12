@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { formatTimeAsLocal } from '../utils/helpers';
 
 const typeColors = {
   coaching: {
@@ -56,8 +56,9 @@ const EventCard = ({
     dot: 'bg-gray-500',
   };
 
-  let start = event.start_time ? new Date(event.start_time) : null;
-  let end = event.end_time ? new Date(event.end_time) : null;
+  // Utiliser formatTimeAsLocal pour éviter les problèmes de fuseau horaire
+  const startTime = formatTimeAsLocal(event.start_time);
+  const endTime = formatTimeAsLocal(event.end_time);
 
   // Vérifier si l'utilisateur peut éditer cet événement
   const canEdit =
@@ -161,8 +162,8 @@ const EventCard = ({
 
       <div className="ml-4">
         <div className={`text-xs font-medium ${colors.text} opacity-75 mb-1`}>
-          {start ? format(start, 'HH:mm') : '--:--'}
-          {end ? ` - ${format(end, 'HH:mm')}` : ''}
+          {startTime}
+          {endTime !== '--:--' ? ` - ${endTime}` : ''}
         </div>
 
         <div className="flex items-center justify-between mb-2">
